@@ -1,6 +1,6 @@
 import DeepCopy.DeepCopy;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class Main {
 
@@ -9,11 +9,8 @@ public class Main {
         list.add("Hello");
         list.add("World");
         Man man = new Man("Dmitry", 24, list);
-        Man man1 = new Man("Dmitry", 24, list);
-        boolean result = man.equals(man);
         Man manClone = DeepCopy.clone(man);
-        boolean d = man.equals(man);
         manClone.getFavoriteBooks().add("World and War");
-        System.out.println("Hello World!");
+        System.out.println("The End!");
     }
 }

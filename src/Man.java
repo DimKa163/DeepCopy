@@ -4,17 +4,17 @@ public class Man {
     private String name;
     private int age;
     private List<String> favoriteBooks;
-    private Man innerMan;
+    private Women women;
 
     public Man(String name, int age, List<String> favoriteBooks) {
         this.name = name;
         this.age = age;
         this.favoriteBooks = favoriteBooks;
-        innerMan = this;
+        women = new Women("Jenny",this);
     }
 
-    public Man getInnerMan(){
-        return innerMan;
+    public Women getWomen(){
+        return women;
     }
     public String getName() {
         return name;

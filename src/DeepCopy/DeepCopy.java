@@ -2,14 +2,21 @@ package DeepCopy;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.List;
+import java.util.*;
 
 public class DeepCopy<TValue>
 {
     private  TValue value;
+    private Map<Object, Object> originalObjects;
 
     public DeepCopy(TValue value){
         this.value = value;
+        this.originalObjects = new HashMap<Object, Object>();
+    }
+
+    public DeepCopy(TValue value, Map<Object, Object> originalObjects){
+        this.value = value;
+        this.originalObjects = originalObjects;
     }
 
     public TValue cloneObject(){
@@ -22,10 +29,14 @@ public class DeepCopy<TValue>
             for (int i = 0; i < array.length; i++) {
                 array[i] = DeepCopy.clone(array[i]);
             }
-            return (TValue)array;
+            TValue newValue = (TValue)array;
+            originalObjects.put(value, newValue);
+            return newValue;
         }
         if (value instanceof String) {
-            return (TValue) new String((String)value);
+            TValue newValue = (TValue) new String((String)value);
+            originalObjects.put(value, newValue);
+            return newValue;
         } else if (value instanceof Integer) {
             return (TValue) new Integer((int)value);
         } else if (value instanceof Long) {
@@ -48,6 +59,7 @@ public class DeepCopy<TValue>
             for (int i = 0; i < src.size(); i++) {
                 newItem.add(DeepCopy.clone(src.get(i)));
             }
+            originalObjects.put(value, newItem);
             return (TValue)newItem;
         }
         TValue newValue;
@@ -56,6 +68,7 @@ public class DeepCopy<TValue>
             newValue = createInstance(cls, null);
         else
             newValue = createInstance(cls, constructors[0]);
+        originalObjects.put(value, newValue);
         while(cls != null){
             copy(newValue, cls);
             cls = cls.getSuperclass();
@@ -69,10 +82,13 @@ public class DeepCopy<TValue>
             field.setAccessible(true);
             try{
                 Object fieldValue = field.get(value);
-                if(value.equals(fieldValue))
-                    field.set(newValue, newValue);
-                else
-                    field.set(newValue, fieldValue);
+                Object v = originalObjects.get(fieldValue);
+                if(v != null)
+                    field.set(newValue, v);
+                else{
+                    Object value = DeepCopy.clone(fieldValue, originalObjects);
+                    field.set(newValue, value);
+                }
             }catch (Exception ex){
                 ex.printStackTrace();
             }
@@ -134,6 +150,10 @@ public class DeepCopy<TValue>
 
     public static <TValue> TValue clone(TValue object){
         DeepCopy<TValue> copyWorker = new DeepCopy<TValue>(object);
+        return copyWorker.cloneObject();
+    }
+    public static <TValue> TValue clone(TValue object, Map<Object, Object> objects){
+        DeepCopy<TValue> copyWorker = new DeepCopy<TValue>(object, objects);
         return copyWorker.cloneObject();
     }
 }
